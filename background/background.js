@@ -1,5 +1,4 @@
 // Background service worker for Jarvis Chrome Extension
-
 // Initialize extension on install
 chrome.runtime.onInstalled.addListener(() => {
     console.log('Jarvis extension installed');
@@ -73,7 +72,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 // Keep service worker alive
 let keepAliveInterval;
-
 function keepAlive() {
     if (keepAliveInterval) clearInterval(keepAliveInterval);
     keepAliveInterval = setInterval(() => {
@@ -82,8 +80,7 @@ function keepAlive() {
         });
     }, 20000);
 }
-
-keepalive();
+keepAlive();
 
 // Listen for extension icon click
 chrome.action.onClicked.addListener((tab) => {
