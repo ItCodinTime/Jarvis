@@ -1,17 +1,23 @@
-# 🎤 Jarvis - Voice-Controlled Browser Automation
+# 🎤 Jarvis - AI-Powered Voice-Controlled Browser Automation
 
-An open-source Chrome extension inspired by ChromePilot that brings voice-controlled, AI-powered browser automation to your fingertips using the Web Speech API.
+An open-source Chrome extension inspired by ChromePilot that brings AI-powered voice-controlled browser automation to your fingertips using the Web Speech API, Google Gemini, and Gmail API.
 
 ## ✨ Features
 
 - 🗣️ **Voice Commands**: Control your browser using natural voice commands
+- 🤖 **AI-Powered Email**: Send emails using voice with AI-generated content powered by Gemini
+- 📄 **Page Summarization**: Get AI-generated summaries of any webpage
+- 💬 **Smart Email Replies**: Generate AI-powered email replies on Gmail
 - 🎯 **Smart Navigation**: Navigate pages, scroll, and interact with web elements hands-free
 - 🚀 **Easy to Use**: Simple popup interface with visual feedback
-- 🔒 **Privacy First**: All voice processing happens locally using Web Speech API
+- 🔒 **Privacy First**: Voice processing happens locally using Web Speech API
 - ⚡ **Fast & Responsive**: Lightweight extension with minimal performance impact
 - 🎨 **Beautiful UI**: Modern, gradient-styled interface with smooth animations
+- ⚙️ **Configurable**: Easy-to-use options page for API key management
 
 ## 📋 Available Commands
+
+### Basic Navigation Commands
 
 | Command | Action |
 |---------|--------|
@@ -23,6 +29,22 @@ An open-source Chrome extension inspired by ChromePilot that brings voice-contro
 | "new tab" | Open a new tab |
 | "close tab" | Close the current tab |
 | "search for [query]" | Search on Google for the query |
+
+### 🆕 AI-Powered Commands
+
+| Command | Action | Requirements |
+|---------|--------|-------------|
+| "send email to [address] with subject [subject] and message [prompt]" | Send an AI-generated email | Gemini API key, Gmail authentication |
+| "summarize this page" | Generate AI summary of current page | Gemini API key |
+| "reply to this email using AI" | Generate AI reply in Gmail compose box | Gemini API key, Gmail tab |
+
+#### Example Commands:
+
+```
+"send email to john@example.com with subject project update and message write about our recent progress"
+"summarize this page"
+"reply to this email using AI"
+```
 
 ## 🚀 Installation
 
@@ -51,116 +73,135 @@ An open-source Chrome extension inspired by ChromePilot that brings voice-contro
    convert -size 48x48 gradient:#667eea-#764ba2 icons/icon48.png
    convert -size 16x16 gradient:#667eea-#764ba2 icons/icon16.png
    ```
-   
-   Or download free icons from resources like:
-   - [Flaticon](https://www.flaticon.com/)
-   - [Icons8](https://icons8.com/)
-   - [Iconfinder](https://www.iconfinder.com/)
 
 3. **Load the extension in Chrome**:
-   
    - Open Chrome and navigate to `chrome://extensions/`
-   - Enable "Developer mode" (toggle in the top right)
+   - Enable "Developer mode" (toggle in top right)
    - Click "Load unpacked"
-   - Select the `Jarvis` directory
-   - The extension icon should appear in your toolbar
+   - Select the cloned Jarvis directory
 
-## 📖 Usage
+4. **Configure API Keys** (required for AI features):
+   - Click the Jarvis extension icon
+   - Click the settings/options button or right-click the extension and select "Options"
+   - Configure your API keys (see Configuration section below)
 
-1. **Activate Jarvis**:
-   - Click the Jarvis extension icon in your Chrome toolbar
-   - The popup will open showing the control panel
+## ⚙️ Configuration
 
-2. **Start Voice Recognition**:
-   - Click the "Start Listening" button (green button with 🎤 icon)
-   - Your browser will ask for microphone permission (first time only)
-   - Grant microphone access to enable voice commands
+### Setting up Gemini API
 
-3. **Give Commands**:
-   - Speak clearly into your microphone
-   - Use any of the available commands listed above
-   - The extension will display your command in the popup
-   - Commands are executed immediately
+1. Get a Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Open Jarvis extension options (right-click extension icon → Options)
+3. Enter your Gemini API key in the "Gemini API Configuration" section
+4. Click "Save Gemini Key"
 
-4. **Stop Listening**:
-   - Click the "Stop" button (red button with ⏹ icon)
-   - Voice recognition will stop until you restart it
+### Setting up Gmail API
 
-## 📁 Project Structure
+#### Option 1: Using Chrome Identity API (Recommended)
 
-```
-Jarvis/
-├── manifest.json          # Extension configuration and permissions
-├── popup/                 # Popup UI and voice recognition logic
-│   ├── popup.html        # Popup interface structure
-│   ├── popup.css         # Popup styling
-│   └── popup.js          # Voice recognition and command processing
-├── background/            # Background service worker
-│   └── background.js     # Extension lifecycle and message handling
-├── content/               # Content scripts
-│   └── content.js        # Page interaction and visual feedback
-├── icons/                 # Extension icons (you need to add these)
-│   ├── icon16.png        # 16x16 toolbar icon
-│   ├── icon48.png        # 48x48 extension page icon
-│   └── icon128.png       # 128x128 store icon
-├── .gitignore            # Git ignore rules
-├── LICENSE               # MIT License
-└── README.md             # This file
-```
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Gmail API for your project
+4. Create OAuth 2.0 credentials:
+   - Go to "Credentials" → "Create Credentials" → "OAuth client ID"
+   - Application type: "Chrome Extension"
+   - Add your extension ID (found in `chrome://extensions/`)
+5. Copy the Client ID and Client Secret
+6. Open Jarvis extension options
+7. Enter your Gmail OAuth Client ID and Client Secret
+8. Click "Save Gmail Credentials"
+9. Click "Authenticate Gmail" to complete OAuth flow
+
+#### Option 2: Using Gmail API with Service Account
+
+For automated workflows, you can use a service account. See [Google's documentation](https://developers.google.com/gmail/api/auth/web-server) for details.
+
+## 🎯 Usage
+
+### Basic Usage
+
+1. Click the Jarvis extension icon in your Chrome toolbar
+2. Click the "Start Listening" button
+3. The indicator will turn purple when listening
+4. Speak your command clearly
+5. Watch as Jarvis executes your command
+6. Click "Stop Listening" to pause voice recognition
+
+### Using AI-Powered Email
+
+1. Ensure Gemini API key and Gmail are configured
+2. Start voice listening
+3. Say: "send email to recipient@example.com with subject meeting notes and message summarize our discussion"
+4. Jarvis will:
+   - Parse your command
+   - Use Gemini to generate email content based on your prompt
+   - Send the email via Gmail API
+   - Confirm when sent
+
+### Using Page Summarization
+
+1. Ensure Gemini API key is configured
+2. Navigate to any webpage
+3. Start voice listening
+4. Say: "summarize this page"
+5. Jarvis will:
+   - Extract page content
+   - Generate a concise summary using Gemini
+   - Display the summary in an alert
+
+### Using AI Email Reply
+
+1. Ensure Gemini API key is configured
+2. Open an email in Gmail
+3. Start voice listening
+4. Say: "reply to this email using AI"
+5. Jarvis will:
+   - Extract the email content
+   - Generate an appropriate reply using Gemini
+   - Insert the reply into the Gmail compose box
+   - You can review and edit before sending
 
 ## 🛠️ Technical Details
 
 ### Technologies Used
 
-- **Manifest V3**: Latest Chrome extension platform
-- **Web Speech API**: For voice recognition (specifically `webkitSpeechRecognition`)
-- **Chrome Extension APIs**:
-  - `chrome.tabs`: For tab management
-  - `chrome.scripting`: For executing scripts in pages
-  - `chrome.storage`: For settings persistence
-  - `chrome.runtime`: For message passing
+- **Web Speech API**: For voice recognition
+- **Google Gemini API**: For AI-powered content generation
+- **Gmail API**: For sending emails programmatically
+- **Chrome Extensions Manifest V3**: Modern extension architecture
+- **Chrome Identity API**: For secure OAuth authentication
 
-### Browser Compatibility
+### Architecture
 
-- Chrome/Chromium 88+
-- Microsoft Edge 88+
-- Brave Browser
-- Opera 74+
+```
+Jarvis/
+├── background/
+│   └── background.js      # Background service worker
+├── content/
+│   └── content.js         # Content scripts for page interaction
+├── options/
+│   ├── options.html       # Options page UI
+│   └── options.js         # Options page logic
+├── popup/
+│   ├── popup.html         # Extension popup UI
+│   ├── popup.css          # Popup styling
+│   └── popup.js           # Voice recognition & command processing
+├── icons/                 # Extension icons (16, 48, 128 px)
+└── manifest.json          # Extension manifest
+```
 
-**Note**: The Web Speech API (voice recognition) is currently only supported in Chromium-based browsers.
+### Permissions
 
-### Permissions Explained
-
-- `activeTab`: Access the currently active tab
-- `scripting`: Execute scripts to control page elements
-- `storage`: Save user preferences and command history
-- `tabs`: Manage browser tabs
-- `<all_urls>`: Content scripts can run on any webpage
-
-## 🔧 Development
-
-### Prerequisites
-
-- Google Chrome or any Chromium-based browser
-- Basic knowledge of JavaScript, HTML, and CSS
-- Text editor or IDE
-
-### Making Changes
-
-1. Make your changes to the code
-2. Go to `chrome://extensions/`
-3. Click the refresh icon on the Jarvis extension card
-4. Test your changes
-
-### Debugging
-
-- **Popup**: Right-click the extension icon → Inspect popup
-- **Background**: Go to `chrome://extensions/` → Click "service worker" under Jarvis
-- **Content Script**: Open DevTools (F12) on any webpage, check the Console
+The extension requires the following permissions:
+- `activeTab`: To interact with the current tab
+- `scripting`: To execute scripts in tabs
+- `storage`: To save API keys and settings
+- `tabs`: To manage tabs
+- `identity`: For Gmail OAuth authentication
+- `host_permissions`: To access Gmail and Gemini APIs
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here are some ways you can contribute:
+We welcome contributions! Here's how you can help:
 
 - 🐛 Report bugs and issues
 - 💡 Suggest new voice commands or features
@@ -169,13 +210,17 @@ Contributions are welcome! Here are some ways you can contribute:
 
 ### Development Roadmap
 
+- [x] Add AI-powered email generation
+- [x] Add page summarization
+- [x] Add AI email reply
+- [x] Settings page for API configuration
 - [ ] Add more voice commands (form filling, clicking specific elements)
 - [ ] Support for custom voice commands
 - [ ] Multi-language support
 - [ ] Command history and favorites
-- [ ] Integration with AI services for natural language understanding
+- [ ] Integration with other AI services (OpenAI, Claude, etc.)
 - [ ] Keyboard shortcuts for quick access
-- [ ] Settings page for customization
+- [ ] Advanced Gmail features (drafts, labels, etc.)
 
 ## 📄 License
 
@@ -185,6 +230,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Inspired by [ChromePilot](https://github.com/topics/chromepilot) and similar voice automation projects
 - Built with the amazing [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
+- Powered by [Google Gemini](https://ai.google.dev/) for AI content generation
 - Icons and design inspired by modern UI/UX trends
 
 ## 📧 Contact & Support
@@ -208,6 +254,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 3. Verify the extension has necessary permissions
 4. Try reloading the extension
 
+### AI features not working
+
+1. Verify Gemini API key is configured in options
+2. Check API key is valid and has not expired
+3. Ensure you have internet connection
+4. Check browser console for API errors
+5. Verify host permissions are granted for API domains
+
+### Gmail authentication failing
+
+1. Ensure OAuth credentials are correctly configured
+2. Check that Gmail API is enabled in Google Cloud Console
+3. Verify extension ID is added to OAuth credentials
+4. Try removing and re-authenticating
+5. Check that you have necessary Gmail permissions
+
 ### Extension icon not showing
 
 1. Make sure you've added the icon files (icon16.png, icon48.png, icon128.png) to the `icons/` directory
@@ -217,4 +279,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by the Jarvis team**
 
-*Empower your browsing experience with voice control!*
+*Empower your browsing experience with AI-powered voice control!*
