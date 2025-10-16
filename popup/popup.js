@@ -4,6 +4,9 @@ const stopBtn = document.getElementById('stopBtn');
 const statusText = document.getElementById('statusText');
 const indicator = document.getElementById('indicator');
 const transcriptText = document.getElementById('transcriptText');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const chatMessages = document.getElementById('chatMessages');
 
 // Web Speech API recognition object
 let recognition;
@@ -36,269 +39,99 @@ function initSpeechRecognition() {
         };
         
         recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            statusText.textContent = `Error: ${event.error}`;
+            console.error('Recognition error:', event.error);
+            updateUI('ready');
         };
         
         recognition.onend = () => {
-            console.log('Voice recognition ended');
-            if (isListening) {
-                recognition.start();
-            }
+            isListening = false;
+            updateUI('ready');
         };
     } else {
-        alert('Speech recognition not supported in this browser.');
+        console.error('Speech recognition not supported');
+        statusText.textContent = 'Speech recognition not supported';
     }
 }
 
-// Process voice commands
+// Process command (voice or text)
 function processCommand(command) {
+    command = command.toLowerCase().trim();
+    
     chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+        if (tabs.length === 0) return;
         const tabId = tabs[0].id;
-        const tabUrl = tabs[0].url;
         
-        // AI-powered email command
-        if (command.includes('send email to')) {
-            await handleSendEmail(command);
+        // Navigation commands
+        if (command.includes('open') || command.includes('go to') || command.includes('navigate')) {
+            const url = extractUrl(command);
+            if (url) {
+                chrome.tabs.update(tabId, {url: url});
+                addChatMessage('Assistant', `Opening ${url}`);
+            }
         }
-        // Page summarization command
-        else if (command.includes('summarize this page')) {
-            await handlePageSummarization(tabId);
-        }
-        // AI reply to email (Gmail only)
-        else if (command.includes('reply to this email') && tabUrl.includes('mail.google.com')) {
-            await handleEmailReply(tabId);
-        }
-        // Existing commands
+        // Scroll commands
         else if (command.includes('scroll down')) {
             executeScroll(tabId, 'down');
-        } else if (command.includes('scroll up')) {
+            addChatMessage('Assistant', 'Scrolling down');
+        }
+        else if (command.includes('scroll up')) {
             executeScroll(tabId, 'up');
-        } else if (command.includes('go back')) {
-            chrome.tabs.goBack(tabId);
-        } else if (command.includes('go forward')) {
-            chrome.tabs.goForward(tabId);
-        } else if (command.includes('refresh') || command.includes('reload')) {
-            chrome.tabs.reload(tabId);
-        } else if (command.includes('new tab')) {
+            addChatMessage('Assistant', 'Scrolling up');
+        }
+        // Tab management
+        else if (command.includes('new tab')) {
             chrome.tabs.create({});
-        } else if (command.includes('close tab')) {
+            addChatMessage('Assistant', 'Opening new tab');
+        }
+        else if (command.includes('close tab')) {
             chrome.tabs.remove(tabId);
-        } else if (command.includes('search for')) {
-            const query = command.replace('search for', '').trim();
-            if (query) {
-                chrome.tabs.create({url: `https://www.google.com/search?q=${encodeURIComponent(query)}`});
+            addChatMessage('Assistant', 'Closing tab');
+        }
+        // AI-powered queries
+        else if (command.includes('summarize') || command.includes('what is') || command.includes('explain')) {
+            addChatMessage('Assistant', 'Processing your request...');
+            try {
+                const response = await queryGemini(command);
+                addChatMessage('Assistant', response);
+            } catch (error) {
+                addChatMessage('Assistant', 'Sorry, I encountered an error processing your request.');
             }
-        } else {
-            statusText.textContent = 'Command not recognized';
-            setTimeout(() => {
-                if (isListening) statusText.textContent = 'Listening...';
-            }, 2000);
+        }
+        else {
+            addChatMessage('Assistant', `Command received: ${command}`);
         }
     });
 }
 
-// Handle send email command
-async function handleSendEmail(command) {
-    try {
-        statusText.textContent = 'Processing email command...';
-        
-        // Parse email command
-        const emailMatch = command.match(/send email to ([\w\s@.]+?)(?:with subject (.+?))?(?:and message (.+))?$/);
-        if (!emailMatch) {
-            statusText.textContent = 'Could not parse email command. Try: "send email to [address] with subject [subject] and message [prompt]"';
-            return;
+// Extract URL from command
+function extractUrl(command) {
+    const urlMatch = command.match(/(?:open|go to|navigate)\s+(?:to\s+)?([\w.-]+\.\w+|\w+)/i);
+    if (urlMatch) {
+        let url = urlMatch[1];
+        if (!url.startsWith('http')) {
+            url = 'https://' + url;
         }
-        
-        const recipient = emailMatch[1].trim();
-        const subject = emailMatch[2] ? emailMatch[2].trim() : 'Email from Jarvis';
-        const messagePrompt = emailMatch[3] ? emailMatch[3].trim() : 'Write a brief email';
-        
-        // Get API keys from storage
-        const data = await chrome.storage.sync.get(['geminiApiKey', 'gmailAuthToken']);
-        
-        if (!data.geminiApiKey) {
-            statusText.textContent = 'Please configure Gemini API key in options';
-            return;
-        }
-        
-        if (!data.gmailAuthToken) {
-            statusText.textContent = 'Please authenticate Gmail in options';
-            return;
-        }
-        
-        // Generate email content using Gemini
-        const emailBody = await generateWithGemini(data.geminiApiKey, `Write a professional email with the following prompt: ${messagePrompt}`);
-        
-        // Send email using Gmail API
-        await sendGmailEmail(data.gmailAuthToken, recipient, subject, emailBody);
-        
-        statusText.textContent = `Email sent to ${recipient}!`;
-        setTimeout(() => {
-            if (isListening) statusText.textContent = 'Listening...';
-        }, 3000);
-    } catch (error) {
-        console.error('Email error:', error);
-        statusText.textContent = 'Error sending email: ' + error.message;
+        return url;
     }
+    return null;
 }
 
-// Handle page summarization
-async function handlePageSummarization(tabId) {
-    try {
-        statusText.textContent = 'Summarizing page...';
-        
-        // Get API key from storage
-        const data = await chrome.storage.sync.get(['geminiApiKey']);
-        
-        if (!data.geminiApiKey) {
-            statusText.textContent = 'Please configure Gemini API key in options';
-            return;
-        }
-        
-        // Get page content
-        const results = await chrome.scripting.executeScript({
-            target: {tabId: tabId},
-            func: () => {
-                return document.body.innerText.substring(0, 5000); // Limit to 5000 chars
+// Query Gemini API
+async function queryGemini(query) {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+            {action: 'queryGemini', query: query},
+            (response) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else if (response && response.result) {
+                    resolve(response.result);
+                } else {
+                    reject(new Error('No response from Gemini'));
+                }
             }
-        });
-        
-        const pageContent = results[0].result;
-        
-        // Generate summary using Gemini
-        const summary = await generateWithGemini(data.geminiApiKey, `Summarize the following content in 3-5 concise sentences:\n\n${pageContent}`);
-        
-        // Display summary
-        alert(`Page Summary:\n\n${summary}`);
-        
-        statusText.textContent = 'Summary generated!';
-        setTimeout(() => {
-            if (isListening) statusText.textContent = 'Listening...';
-        }, 2000);
-    } catch (error) {
-        console.error('Summarization error:', error);
-        statusText.textContent = 'Error generating summary: ' + error.message;
-    }
-}
-
-// Handle email reply with AI
-async function handleEmailReply(tabId) {
-    try {
-        statusText.textContent = 'Generating AI reply...';
-        
-        // Get API key from storage
-        const data = await chrome.storage.sync.get(['geminiApiKey']);
-        
-        if (!data.geminiApiKey) {
-            statusText.textContent = 'Please configure Gemini API key in options';
-            return;
-        }
-        
-        // Get email content from Gmail
-        const results = await chrome.scripting.executeScript({
-            target: {tabId: tabId},
-            func: () => {
-                const emailBody = document.querySelector('.a3s.aiL');
-                return emailBody ? emailBody.innerText : '';
-            }
-        });
-        
-        const emailContent = results[0].result;
-        
-        if (!emailContent) {
-            statusText.textContent = 'Could not find email content';
-            return;
-        }
-        
-        // Generate reply using Gemini
-        const reply = await generateWithGemini(data.geminiApiKey, `Write a professional reply to the following email:\n\n${emailContent}`);
-        
-        // Insert reply into compose box
-        await chrome.scripting.executeScript({
-            target: {tabId: tabId},
-            func: (replyText) => {
-                // Click reply button
-                const replyBtn = document.querySelector('[aria-label*="Reply"]');
-                if (replyBtn) replyBtn.click();
-                
-                // Wait for compose box and insert text
-                setTimeout(() => {
-                    const composeBox = document.querySelector('[aria-label="Message Body"]');
-                    if (composeBox) {
-                        composeBox.innerHTML = replyText.replace(/\n/g, '<br>');
-                    }
-                }, 1000);
-            },
-            args: [reply]
-        });
-        
-        statusText.textContent = 'AI reply generated!';
-        setTimeout(() => {
-            if (isListening) statusText.textContent = 'Listening...';
-        }, 2000);
-    } catch (error) {
-        console.error('Reply error:', error);
-        statusText.textContent = 'Error generating reply: ' + error.message;
-    }
-}
-
-// Generate text using Gemini API
-async function generateWithGemini(apiKey, prompt) {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            contents: [{
-                parts: [{
-                    text: prompt
-                }]
-            }]
-        })
+        );
     });
-    
-    if (!response.ok) {
-        throw new Error('Gemini API error: ' + response.statusText);
-    }
-    
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-}
-
-// Send email using Gmail API
-async function sendGmailEmail(authToken, to, subject, body) {
-    const email = [
-        'Content-Type: text/html; charset=utf-8',
-        'MIME-Version: 1.0',
-        `To: ${to}`,
-        `Subject: ${subject}`,
-        '',
-        body
-    ].join('\r\n');
-    
-    const encodedEmail = btoa(unescape(encodeURIComponent(email)))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
-    
-    const response = await fetch('https://www.googleapis.com/gmail/v1/users/me/messages/send', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            raw: encodedEmail
-        })
-    });
-    
-    if (!response.ok) {
-        throw new Error('Gmail API error: ' + response.statusText);
-    }
-    
-    return await response.json();
 }
 
 // Execute scroll command
@@ -311,6 +144,37 @@ function executeScroll(tabId, direction) {
         },
         args: [scrollAmount]
     });
+}
+
+// Add message to chat display
+function addChatMessage(sender, message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender.toLowerCase()}-message`;
+    
+    const senderSpan = document.createElement('span');
+    senderSpan.className = 'message-sender';
+    senderSpan.textContent = sender + ': ';
+    
+    const contentSpan = document.createElement('span');
+    contentSpan.className = 'message-content';
+    contentSpan.textContent = message;
+    
+    messageDiv.appendChild(senderSpan);
+    messageDiv.appendChild(contentSpan);
+    chatMessages.appendChild(messageDiv);
+    
+    // Auto-scroll to bottom
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Handle text chat submission
+function handleChatSubmit() {
+    const message = chatInput.value.trim();
+    if (message) {
+        addChatMessage('You', message);
+        processCommand(message);
+        chatInput.value = '';
+    }
 }
 
 // Update UI state
@@ -344,5 +208,16 @@ stopBtn.addEventListener('click', () => {
     }
 });
 
+// Chat input event listeners
+chatSendBtn.addEventListener('click', handleChatSubmit);
+
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleChatSubmit();
+    }
+});
+
 // Initialize on load
 initSpeechRecognition();
+addChatMessage('Assistant', 'Hello! I\'m Jarvis. You can type commands or use voice control. Try "open google.com" or "summarize this page".');
