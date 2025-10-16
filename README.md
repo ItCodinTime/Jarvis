@@ -5,6 +5,7 @@ An open-source Chrome extension inspired by ChromePilot that brings AI-powered v
 ## ✨ Features
 
 - 🗣️ **Voice Commands**: Control your browser using natural voice commands
+- 💬 **Text Chat Interface**: NEW! Type commands directly in the popup for quick interactions
 - 🤖 **AI-Powered Email**: Send emails using voice with AI-generated content powered by Gemini
 - 📄 **Page Summarization**: Get AI-generated summaries of any webpage
 - 💬 **Smart Email Replies**: Generate AI-powered email replies on Gmail
@@ -15,7 +16,50 @@ An open-source Chrome extension inspired by ChromePilot that brings AI-powered v
 - 🎨 **Beautiful UI**: Modern, gradient-styled interface with smooth animations
 - ⚙️ **Configurable**: Easy-to-use options page for API key management
 
+## 💬 Text Chat Interface (NEW!)
+
+In addition to voice control, Jarvis now includes a text chat interface in the popup for quick, typed interactions. This feature is perfect when you're in a quiet environment or prefer typing over speaking.
+
+### How to Use Text Chat:
+
+1. Click the Jarvis extension icon to open the popup
+2. Scroll down to the "💬 Chat with Jarvis" section
+3. Type your command or question in the text input area
+4. Press Enter or click the "Send" button
+5. View responses and results in the chat message area above
+
+### Text Chat Capabilities:
+
+- **All voice commands work via text**: Simply type the same commands you would speak
+- **AI-powered queries**: Ask questions, request summaries, or have conversations
+- **Navigation commands**: "open google.com", "scroll down", "new tab", etc.
+- **AI content generation**: "summarize this page", "explain [topic]", etc.
+- **Persistent chat history**: See your conversation history within the session
+- **Real-time responses**: Get immediate feedback for navigation commands
+
+### Example Text Chat Commands:
+
+```
+open youtube.com
+scroll down
+summarize this page
+what is machine learning?
+new tab
+go back
+refresh
+```
+
+### Benefits of Text Chat:
+
+✅ Use Jarvis in quiet environments (libraries, offices, etc.)
+✅ Faster input for complex commands or URLs
+✅ Visual chat history to review previous commands
+✅ More precise command entry (no speech recognition errors)
+✅ Works alongside voice commands - use whichever you prefer!
+
 ## 📋 Available Commands
+
+All commands work with both voice input and text chat!
 
 ### Basic Navigation Commands
 
@@ -29,6 +73,7 @@ An open-source Chrome extension inspired by ChromePilot that brings AI-powered v
 | "new tab" | Open a new tab |
 | "close tab" | Close the current tab |
 | "search for [query]" | Search on Google for the query |
+| "open [website]" or "go to [website]" | Navigate to a specific website |
 
 ### 🆕 AI-Powered Commands
 
@@ -37,6 +82,7 @@ An open-source Chrome extension inspired by ChromePilot that brings AI-powered v
 | "send email to [address] with subject [subject] and message [prompt]" | Send an AI-generated email | Gemini API key, Gmail authentication |
 | "summarize this page" | Generate AI summary of current page | Gemini API key |
 | "reply to this email using AI" | Generate AI reply in Gmail compose box | Gemini API key, Gmail tab |
+| "what is [topic]" or "explain [topic]" | Get AI explanation of any topic | Gemini API key |
 
 #### Example Commands:
 
@@ -44,185 +90,132 @@ An open-source Chrome extension inspired by ChromePilot that brings AI-powered v
 "send email to john@example.com with subject project update and message write about our recent progress"
 "summarize this page"
 "reply to this email using AI"
+"what is quantum computing?"
+"explain machine learning in simple terms"
+"open github.com"
+"scroll down"
+"new tab"
 ```
 
 ## 🚀 Installation
 
-### From Source
-
-1. **Clone the repository**:
+1. Clone this repository:
    ```bash
    git clone https://github.com/ItCodinTime/Jarvis.git
-   cd Jarvis
    ```
 
-2. **Add Icon Files** (required before loading):
-   
-   The extension requires icon files in the `icons/` directory. Create an `icons` folder in the root directory and add three PNG images:
-   
-   - `icon16.png` (16x16 pixels)
-   - `icon48.png` (48x48 pixels)
-   - `icon128.png` (128x128 pixels)
-   
-   You can create simple icons using any image editor or use free icon resources. Example using ImageMagick:
-   
-   ```bash
-   mkdir icons
-   # Create a simple gradient icon (requires ImageMagick)
-   convert -size 128x128 gradient:#667eea-#764ba2 icons/icon128.png
-   convert -size 48x48 gradient:#667eea-#764ba2 icons/icon48.png
-   convert -size 16x16 gradient:#667eea-#764ba2 icons/icon16.png
-   ```
+2. Open Chrome and navigate to `chrome://extensions/`
 
-3. **Load the extension in Chrome**:
-   - Open Chrome and navigate to `chrome://extensions/`
-   - Enable "Developer mode" (toggle in top right)
-   - Click "Load unpacked"
-   - Select the cloned Jarvis directory
+3. Enable "Developer mode" in the top right corner
 
-4. **Configure API Keys** (required for AI features):
-   - Click the Jarvis extension icon
-   - Click the settings/options button or right-click the extension and select "Options"
-   - Configure your API keys (see Configuration section below)
+4. Click "Load unpacked" and select the Jarvis directory
+
+5. The Jarvis icon should appear in your browser toolbar
 
 ## ⚙️ Configuration
 
-### Setting up Gemini API
+### Setting up Gemini API (Required for AI features)
 
-1. Get a Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Open Jarvis extension options (right-click extension icon → Options)
-3. Enter your Gemini API key in the "Gemini API Configuration" section
-4. Click "Save Gemini Key"
+1. Get your free Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
-### Setting up Gmail API
+2. Click the Jarvis extension icon
 
-#### Option 1: Using Chrome Identity API (Recommended)
+3. Click the settings/options button or right-click the extension icon → Options
+
+4. Enter your Gemini API key in the "API Keys" section
+
+5. Click "Save Settings"
+
+### Setting up Gmail API (Optional - for email features)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+
 2. Create a new project or select an existing one
-3. Enable the Gmail API for your project
+
+3. Enable the Gmail API
+
 4. Create OAuth 2.0 credentials:
-   - Go to "Credentials" → "Create Credentials" → "OAuth client ID"
-   - Application type: "Chrome Extension"
-   - Add your extension ID (found in `chrome://extensions/`)
-5. Copy the Client ID and Client Secret
-6. Open Jarvis extension options
-7. Enter your Gmail OAuth Client ID and Client Secret
-8. Click "Save Gmail Credentials"
-9. Click "Authenticate Gmail" to complete OAuth flow
+   - Application type: Chrome Extension
+   - Add your extension ID
 
-#### Option 2: Using Gmail API with Service Account
+5. Update `manifest.json` with your OAuth credentials
 
-For automated workflows, you can use a service account. See [Google's documentation](https://developers.google.com/gmail/api/auth/web-server) for details.
+6. First time using email features, you'll be prompted to authorize
 
-## 🎯 Usage
+## 🎯 Usage Tips
 
-### Basic Usage
+### Voice Control:
 
-1. Click the Jarvis extension icon in your Chrome toolbar
-2. Click the "Start Listening" button
-3. The indicator will turn purple when listening
-4. Speak your command clearly
-5. Watch as Jarvis executes your command
-6. Click "Stop Listening" to pause voice recognition
+- Speak clearly and at a moderate pace
+- Wait for the "Listening..." indicator before speaking
+- Use natural language - Jarvis understands context
+- You can chain multiple commands: "Open Gmail and summarize the first email"
 
-### Using AI-Powered Email
+### Text Chat:
 
-1. Ensure Gemini API key and Gmail are configured
-2. Start voice listening
-3. Say: "send email to recipient@example.com with subject meeting notes and message summarize our discussion"
-4. Jarvis will:
-   - Parse your command
-   - Use Gemini to generate email content based on your prompt
-   - Send the email via Gmail API
-   - Confirm when sent
+- Type commands just as you would speak them
+- Use Shift+Enter for multi-line input (if needed for complex queries)
+- Press Enter to send (or click the Send button)
+- View chat history to reference previous commands and responses
+- Combine with voice control for maximum flexibility
 
-### Using Page Summarization
+### AI Features:
 
-1. Ensure Gemini API key is configured
-2. Navigate to any webpage
-3. Start voice listening
-4. Say: "summarize this page"
-5. Jarvis will:
-   - Extract page content
-   - Generate a concise summary using Gemini
-   - Display the summary in an alert
+- For best results, be specific in your requests
+- The AI can understand context from the current page
+- Email generation works best with detailed prompts
+- Page summarization works on any webpage with readable content
 
-### Using AI Email Reply
+## 🛠️ Technical Stack
 
-1. Ensure Gemini API key is configured
-2. Open an email in Gmail
-3. Start voice listening
-4. Say: "reply to this email using AI"
-5. Jarvis will:
-   - Extract the email content
-   - Generate an appropriate reply using Gemini
-   - Insert the reply into the Gmail compose box
-   - You can review and edit before sending
-
-## 🛠️ Technical Details
-
-### Technologies Used
-
-- **Web Speech API**: For voice recognition
+- **Web Speech API**: For voice recognition (works offline)
 - **Google Gemini API**: For AI-powered content generation
-- **Gmail API**: For sending emails programmatically
-- **Chrome Extensions Manifest V3**: Modern extension architecture
-- **Chrome Identity API**: For secure OAuth authentication
+- **Gmail API**: For email integration
+- **Chrome Extensions API**: For browser automation
+- **Modern JavaScript**: ES6+ features
+- **CSS3**: Gradient styling and animations
 
-### Architecture
+## 📁 Project Structure
 
 ```
 Jarvis/
 ├── background/
-│   └── background.js      # Background service worker
+│   └── background.js       # Background service worker for API calls
 ├── content/
-│   └── content.js         # Content scripts for page interaction
+│   └── content.js          # Content script for page interaction
 ├── options/
-│   ├── options.html       # Options page UI
-│   └── options.js         # Options page logic
+│   ├── options.html        # Options page UI
+│   ├── options.css         # Options page styling
+│   └── options.js          # Options page logic
 ├── popup/
-│   ├── popup.html         # Extension popup UI
-│   ├── popup.css          # Popup styling
-│   └── popup.js           # Voice recognition & command processing
-├── icons/                 # Extension icons (16, 48, 128 px)
-└── manifest.json          # Extension manifest
+│   ├── popup.html          # Popup interface with voice & chat
+│   ├── popup.css           # Popup styling with chat interface
+│   └── popup.js            # Popup logic with chat functionality
+├── manifest.json           # Extension configuration
+└── README.md              # This file
 ```
 
-### Permissions
+## 🔧 Permissions Used
 
-The extension requires the following permissions:
-- `activeTab`: To interact with the current tab
-- `scripting`: To execute scripts in tabs
-- `storage`: To save API keys and settings
-- `tabs`: To manage tabs
-- `identity`: For Gmail OAuth authentication
-- `host_permissions`: To access Gmail and Gemini APIs
+- `activeTab`: To interact with the current page
+- `tabs`: For tab management and navigation
+- `storage`: To save user preferences and API keys
+- `scripting`: To execute scripts on web pages
+- `identity`: For OAuth authentication (Gmail)
+- `https://generativelanguage.googleapis.com/*`: For Gemini API access
+- `https://www.googleapis.com/*`: For Gmail API access
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-- 🐛 Report bugs and issues
-- 💡 Suggest new voice commands or features
-- 📝 Improve documentation
-- 🔧 Submit pull requests with improvements
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### Development Roadmap
-
-- [x] Add AI-powered email generation
-- [x] Add page summarization
-- [x] Add AI email reply
-- [x] Settings page for API configuration
-- [ ] Add more voice commands (form filling, clicking specific elements)
-- [ ] Support for custom voice commands
-- [ ] Multi-language support
-- [ ] Command history and favorites
-- [ ] Integration with other AI services (OpenAI, Claude, etc.)
-- [ ] Keyboard shortcuts for quick access
-- [ ] Advanced Gmail features (drafts, labels, etc.)
-
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -247,9 +240,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 3. Try refreshing the extension
 4. Check browser console for errors
 
+### Text chat not working
+
+1. Ensure the extension popup is fully loaded
+2. Try typing simple commands first ("new tab", "scroll down")
+3. Check browser console for JavaScript errors
+4. Reload the extension from `chrome://extensions/`
+
 ### Commands not executing
 
-1. Ensure you're speaking clearly
+1. Ensure you're speaking or typing clearly
 2. Check that the command syntax matches the available commands
 3. Verify the extension has necessary permissions
 4. Try reloading the extension
@@ -279,4 +279,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by the Jarvis team**
 
-*Empower your browsing experience with AI-powered voice control!*
+*Empower your browsing experience with AI-powered voice control and text chat!*
