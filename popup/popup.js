@@ -55,243 +55,182 @@ function initSpeechRecognition() {
         transcriptText.style.opacity = '1';
       }, TIMING.quick);
       
-      processCommand(command);
-    };
-    
-    recognition.onerror = (event) => {
-      console.error('Recognition error:', event.error);
-      showToast('error', `Voice recognition error: ${event.error}`);
-      updateUI('ready');
+      // Send command with animation
+      isProcessing = true;
+      updateUI('processing');
+      animateIndicator('spin');
+      
+      addChatMessage('You', command);
+      
+      setTimeout(() => {
+        chrome.runtime.sendMessage(
+          { action: 'executeCommand', command: command },
+          (response) => {
+            isProcessing = false;
+            updateUI('listening');
+            animateIndicator('pulse');
+            
+            if (response && response.success) {
+              addChatMessage('Assistant', `Command "${command}" executed successfully!`);
+            } else {
+              addChatMessage('Assistant', `Sorry, I couldn't execute "${command}"`);
+            }
+          }
+        );
+      }, TIMING.standard);
     };
     
     recognition.onend = () => {
+      console.log('Voice recognition ended');
       isListening = false;
       updateUI('ready');
-      animateIndicator('fade');
+    };
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      isListening = false;
+      updateUI('error');
+      animateIndicator('error');
+      
+      let errorMsg = 'An error occurred.';
+      if (event.error === 'no-speech') {
+        errorMsg = 'No speech detected. Please try again.';
+      } else if (event.error === 'not-allowed') {
+        errorMsg = 'Microphone access denied. Please allow microphone access.';
+      }
+      
+      // Error animation
+      statusText.style.transition = `color ${TIMING.standard}ms ${TIMING.ease}`;
+      statusText.style.color = '#ef4444';
+      setTimeout(() => {
+        statusText.style.color = '';
+      }, TIMING.slow * 2);
+      
+      addChatMessage('Assistant', errorMsg);
     };
   } else {
     console.error('Speech recognition not supported');
-    statusText.textContent = 'Speech recognition not supported';
-    showToast('error', 'Your browser does not support speech recognition');
+    statusText.textContent = 'Speech recognition not supported in this browser';
+    startBtn.disabled = true;
   }
 }
 
-// Process command (voice or text) with enhanced feedback
-function processCommand(command) {
-  if (isProcessing) return;
-  
-  isProcessing = true;
-  showLoader(true);
-  
-  // Add user message with smooth animation
-  addChatMessage('You', command);
-  
-  // Simulate processing delay
+// Animate indicator with different patterns
+function animateIndicator(type) {
+  indicator.className = ''; // Reset
   setTimeout(() => {
-    chrome.runtime.sendMessage(
-      { action: 'processCommand', command: command },
-      (response) => {
-        showLoader(false);
-        isProcessing = false;
-        
-        if (response && response.success) {
-          addChatMessage('Assistant', response.message || 'Command executed successfully!');
-          showToast('success', '✓ Command completed');
-        } else {
-          const errorMsg = response?.message || 'Failed to execute command';
-          addChatMessage('Assistant', errorMsg);
-          showToast('error', `✗ ${errorMsg}`);
-        }
-      }
-    );
-  }, TIMING.quick);
+    indicator.className = type;
+  }, 10);
 }
 
-// Add chat message with enhanced animation
+// Update UI based on state with smooth animations
+function updateUI(state) {
+  const transitions = `all ${TIMING.standard}ms ${TIMING.smooth}`;
+  startBtn.style.transition = transitions;
+  stopBtn.style.transition = transitions;
+  statusText.style.transition = transitions;
+  indicator.style.transition = transitions;
+  
+  switch(state) {
+    case 'ready':
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      statusText.textContent = 'Ready to listen';
+      statusText.style.color = '#10b981';
+      indicator.style.opacity = '0.5';
+      animateIndicator('idle');
+      break;
+    case 'listening':
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      statusText.textContent = 'Listening...';
+      statusText.style.color = '#3b82f6';
+      indicator.style.opacity = '1';
+      break;
+    case 'processing':
+      startBtn.disabled = true;
+      stopBtn.disabled = true;
+      statusText.textContent = 'Processing...';
+      statusText.style.color = '#f59e0b';
+      indicator.style.opacity = '1';
+      break;
+    case 'error':
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      statusText.textContent = 'Error occurred';
+      statusText.style.color = '#ef4444';
+      indicator.style.opacity = '0.5';
+      break;
+  }
+}
+
+// Add message to chat with smooth entrance animation
 function addChatMessage(sender, text) {
-  const bubble = document.createElement('div');
-  bubble.className = `bubble ${sender === 'You' ? 'user' : 'ai'}`;
-  bubble.textContent = text;
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${sender.toLowerCase()}`;
   
-  // Set initial state for animation
-  bubble.style.opacity = '0';
-  bubble.style.transform = 'translateY(20px) scale(0.95)';
+  const senderSpan = document.createElement('strong');
+  senderSpan.textContent = sender + ':';
   
-  chatMessages.appendChild(bubble);
+  const textSpan = document.createElement('span');
+  textSpan.textContent = ' ' + text;
   
-  // Smooth scroll to bottom
-  requestAnimationFrame(() => {
+  messageDiv.appendChild(senderSpan);
+  messageDiv.appendChild(textSpan);
+  
+  // Entrance animation
+  messageDiv.style.opacity = '0';
+  messageDiv.style.transform = 'translateY(10px)';
+  chatMessages.appendChild(messageDiv);
+  
+  setTimeout(() => {
+    messageDiv.style.transition = `all ${TIMING.standard}ms ${TIMING.smooth}`;
+    messageDiv.style.opacity = '1';
+    messageDiv.style.transform = 'translateY(0)';
+    
+    // Smooth scroll
     chatMessages.scrollTo({
       top: chatMessages.scrollHeight,
       behavior: 'smooth'
     });
-  });
-  
-  // Trigger entrance animation
-  setTimeout(() => {
-    bubble.style.transition = `all ${TIMING.standard}ms ${TIMING.bounce}`;
-    bubble.style.opacity = '1';
-    bubble.style.transform = 'translateY(0) scale(1)';
-  }, 50);
+  }, 10);
 }
 
-// Show/hide loader with smooth transitions
-function showLoader(show) {
-  let loader = document.querySelector('.loader-container');
-  
-  if (show) {
-    if (!loader) {
-      loader = document.createElement('div');
-      loader.className = 'loader-container';
-      loader.innerHTML = `
-        <div class="loader"></div>
-        <span class="small" style="margin-left: 8px;">Thinking...</span>
-      `;
-      loader.style.opacity = '0';
-      chatMessages.appendChild(loader);
-      
-      // Smooth fade-in
-      setTimeout(() => {
-        loader.style.transition = `opacity ${TIMING.standard}ms ${TIMING.smooth}`;
-        loader.style.opacity = '1';
-      }, 50);
-    }
-  } else {
-    if (loader) {
-      loader.style.transition = `opacity ${TIMING.quick}ms ${TIMING.ease}`;
-      loader.style.opacity = '0';
-      
-      setTimeout(() => {
-        if (loader && loader.parentNode) {
-          loader.parentNode.removeChild(loader);
-        }
-      }, TIMING.quick);
-    }
-  }
-  
-  // Smooth scroll to show loader
-  if (show) {
-    setTimeout(() => {
-      chatMessages.scrollTo({
-        top: chatMessages.scrollHeight,
-        behavior: 'smooth'
-      });
-    }, 100);
-  }
-}
-
-// Show toast notification with smooth animation
-function showToast(type, message, duration = 2000) {
-  const existingToast = document.querySelector('.feedback-toast');
-  if (existingToast) {
-    existingToast.remove();
-  }
-  
-  const toast = document.createElement('div');
-  toast.className = `feedback-toast feedback-${type}`;
-  toast.textContent = message;
-  toast.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 18px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: white;
-    background: ${type === 'success' ? 'linear-gradient(135deg, #34c759, #30b350)' : 'linear-gradient(135deg, #ff453a, #ff3b30)'};
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(20px);
-    z-index: 10000;
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: all ${TIMING.standard}ms ${TIMING.bounce};
-  `;
-  
-  document.body.appendChild(toast);
-  
-  // Animate in
-  setTimeout(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateY(0)';
-  }, 50);
-  
-  // Animate out and remove
-  setTimeout(() => {
-    toast.style.transition = `all ${TIMING.standard}ms ${TIMING.ease}`;
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(-20px)';
-    setTimeout(() => toast.remove(), TIMING.standard);
-  }, duration);
-}
-
-// Animate indicator element
-function animateIndicator(type) {
-  if (!indicator) return;
-  
-  if (type === 'pulse') {
-    indicator.style.animation = 'pulse 1.5s ease-in-out infinite';
-  } else if (type === 'fade') {
-    indicator.style.transition = `opacity ${TIMING.standard}ms ${TIMING.ease}`;
-    indicator.style.animation = '';
-  }
-}
-
-// Handle text chat submission with smooth animations
+// Handle chat input submit
 function handleChatSubmit() {
-  const message = chatInput.value.trim();
-  if (message && !isProcessing) {
-    // Smooth input clear animation
-    chatInput.style.transition = `opacity ${TIMING.quick}ms ${TIMING.ease}`;
-    chatInput.style.opacity = '0.5';
-    
+  const text = chatInput.value.trim();
+  if (text) {
+    // Input animation
+    chatInput.style.transition = `transform ${TIMING.quick}ms ${TIMING.ease}`;
+    chatInput.style.transform = 'scale(0.98)';
     setTimeout(() => {
-      processCommand(message);
+      chatInput.style.transform = 'scale(1)';
+    }, TIMING.quick);
+    
+    addChatMessage('You', text);
+    
+    chrome.runtime.sendMessage(
+      { action: 'executeCommand', command: text },
+      (response) => {
+        if (response && response.success) {
+          addChatMessage('Assistant', `Command "${text}" executed successfully!`);
+        } else {
+          addChatMessage('Assistant', `Sorry, I couldn't execute "${text}"`);
+        }
+      }
+    );
+    
+    // Clear with fade animation
+    chatInput.style.transition = `opacity ${TIMING.quick}ms ${TIMING.ease}`;
+    chatInput.style.opacity = '0';
+    setTimeout(() => {
       chatInput.value = '';
       chatInput.style.opacity = '1';
-      chatInput.focus();
     }, TIMING.quick);
   }
 }
 
-// Update UI state with smooth transitions
-function updateUI(state) {
-  const transition = `all ${TIMING.standard}ms ${TIMING.smooth}`;
-  
-  if (state === 'listening') {
-    statusText.textContent = 'Listening...';
-    statusText.style.color = 'var(--accent)';
-    statusText.style.transition = transition;
-    
-    indicator.classList.add('listening');
-    indicator.style.transition = transition;
-    
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-    
-    // Button animation
-    startBtn.style.transition = transition;
-    startBtn.style.opacity = '0.6';
-    startBtn.style.transform = 'scale(0.98)';
-  } else if (state === 'ready') {
-    statusText.textContent = 'Ready';
-    statusText.style.color = 'var(--text)';
-    statusText.style.transition = transition;
-    
-    indicator.classList.remove('listening');
-    indicator.style.transition = transition;
-    
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    
-    // Button animation
-    startBtn.style.transition = transition;
-    startBtn.style.opacity = '1';
-    startBtn.style.transform = 'scale(1)';
-  }
-}
-
-// Event listeners with enhanced animations
+// Start button handler
 startBtn.addEventListener('click', () => {
   if (recognition && !isListening) {
     // Button feedback animation
@@ -304,6 +243,7 @@ startBtn.addEventListener('click', () => {
   }
 });
 
+// Stop button handler
 stopBtn.addEventListener('click', () => {
   if (recognition && isListening) {
     // Button feedback animation
@@ -312,9 +252,7 @@ stopBtn.addEventListener('click', () => {
       stopBtn.style.transition = `transform ${TIMING.standard}ms ${TIMING.bounce}`;
       stopBtn.style.transform = 'scale(1)';
       
-      isListening = false;
       recognition.stop();
-      updateUI('ready');
       
       // Animate transcript clear
       transcriptText.style.transition = `opacity ${TIMING.quick}ms ${TIMING.ease}`;
@@ -329,7 +267,6 @@ stopBtn.addEventListener('click', () => {
 
 // Chat input event listeners
 chatSendBtn.addEventListener('click', handleChatSubmit);
-
 chatInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
