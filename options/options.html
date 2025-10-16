@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jarvis Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #333;
+      font-size: 24px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 3px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jarvis Extension Settings</h1>
+  
+  <div class="section">
+    <h2>Gemini API Configuration</h2>
+    <label for="gemini-api-key">Gemini API Key:</label>
+    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key">
+    <button id="save-gemini">Save Gemini Key</button>
+    <div id="gemini-status"></div>
+  </div>
+
+  <div class="section">
+    <h2>Gmail API Configuration</h2>
+    <label for="gmail-client-id">Gmail OAuth Client ID:</label>
+    <input type="text" id="gmail-client-id" placeholder="Enter your Gmail OAuth Client ID">
+    <label for="gmail-client-secret">Gmail OAuth Client Secret:</label>
+    <input type="password" id="gmail-client-secret" placeholder="Enter your Gmail OAuth Client Secret">
+    <button id="save-gmail">Save Gmail Credentials</button>
+    <button id="auth-gmail">Authenticate Gmail</button>
+    <div id="gmail-status"></div>
+  </div>
+
+  <div class="section">
+    <h2>Authentication Status</h2>
+    <p id="auth-info">Checking authentication status...</p>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
