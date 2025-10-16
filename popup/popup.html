@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis - Voice Control</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Jarvis</h1>
+            <p class="tagline">Voice-Controlled Browser Automation</p>
+        </div>
+        
+        <div class="status" id="status">
+            <div class="status-indicator" id="indicator"></div>
+            <span id="statusText">Ready</span>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn btn-primary">
+                <span class="icon">🎤</span>
+                Start Listening
+            </button>
+            <button id="stopBtn" class="btn btn-secondary" disabled>
+                <span class="icon">⏹</span>
+                Stop
+            </button>
+        </div>
+        
+        <div class="transcript" id="transcript">
+            <div class="transcript-header">Last Command:</div>
+            <div class="transcript-text" id="transcriptText">No commands yet...</div>
+        </div>
+        
+        <div class="commands-help">
+            <details>
+                <summary>Available Commands</summary>
+                <ul>
+                    <li><strong>"scroll down"</strong> - Scroll page down</li>
+                    <li><strong>"scroll up"</strong> - Scroll page up</li>
+                    <li><strong>"go back"</strong> - Navigate to previous page</li>
+                    <li><strong>"go forward"</strong> - Navigate to next page</li>
+                    <li><strong>"refresh"</strong> or <strong>"reload"</strong> - Reload page</li>
+                    <li><strong>"new tab"</strong> - Open new tab</li>
+                    <li><strong>"close tab"</strong> - Close current tab</li>
+                    <li><strong>"search for [query]"</strong> - Search on Google</li>
+                </ul>
+            </details>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by Web Speech API</p>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
