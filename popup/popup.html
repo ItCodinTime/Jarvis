@@ -3,44 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarvis - Voice Control</title>
+    <title>Jarvis - AI Voice Assistant</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="container">
+        <!-- Header with animated gradient -->
         <div class="header">
-            <h1>🎤 Jarvis</h1>
+            <div class="logo-container">
+                <div class="logo-pulse"></div>
+                <h1>🎤 Jarvis</h1>
+            </div>
             <p class="tagline">Voice-Controlled Browser Automation</p>
+            <div class="powered-by">Powered by Gemini AI</div>
         </div>
         
-        <div class="status" id="status">
-            <div class="status-indicator" id="indicator"></div>
-            <span id="statusText">Ready</span>
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <p class="loading-text" id="loadingText">Initializing...</p>
+            </div>
         </div>
         
+        <!-- Status Indicator -->
+        <div class="status-card" id="status">
+            <div class="status-content">
+                <div class="status-indicator" id="indicator"></div>
+                <span id="statusText">Ready</span>
+            </div>
+            <div class="status-detail" id="statusDetail"></div>
+        </div>
+        
+        <!-- Voice Controls -->
         <div class="controls">
-            <button id="startBtn" class="btn btn-primary">
+            <button class="btn btn-primary" id="startBtn">
                 <span class="icon">🎤</span>
-                Start Listening
+                <span class="btn-text">Start Listening</span>
+                <div class="ripple"></div>
             </button>
-            <button id="stopBtn" class="btn btn-secondary" disabled>
+            <button class="btn btn-secondary" id="stopBtn" disabled>
                 <span class="icon">⏹</span>
-                Stop
+                <span class="btn-text">Stop</span>
+                <div class="ripple"></div>
             </button>
         </div>
         
-        <div class="transcript" id="transcript">
-            <div class="transcript-header">Last Command:</div>
+        <!-- Voice Visualizer -->
+        <div class="voice-visualizer" id="voiceVisualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+        
+        <!-- Transcript Section -->
+        <div class="transcript-card" id="transcript">
+            <div class="transcript-header">
+                <span class="transcript-icon">💬</span>
+                Last Command:
+            </div>
             <div class="transcript-text" id="transcriptText">No commands yet...</div>
         </div>
         
-        <!-- New Text Chat Interface -->
+        <!-- Text Chat Interface -->
         <div class="chat-section">
-            <div class="chat-header">💬 Chat with Jarvis</div>
-            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-header">
+                <span class="chat-icon">✨</span>
+                Chat with Jarvis
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <p>👋 Hello! I'm Jarvis, your AI browser assistant.</p>
+                    <p class="welcome-subtitle">Try commands like:</p>
+                    <ul class="command-examples">
+                        <li>"Search for AI news"</li>
+                        <li>"Scroll to top"</li>
+                        <li>"Summarize this page"</li>
+                    </ul>
+                </div>
+            </div>
             <div class="chat-input-container">
-                <textarea id="chatInput" placeholder="Type your command or question..." rows="2"></textarea>
-                <button id="chatSendBtn" class="btn btn-send">Send</button>
+                <textarea 
+                    id="chatInput" 
+                    placeholder="Type your command or question..."
+                    rows="2"
+                    maxlength="500"></textarea>
+                <button class="btn btn-send" id="chatSendBtn">
+                    <span class="send-icon">➤</span>
+                </button>
+            </div>
+            <div class="char-counter" id="charCounter">0/500</div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="quick-btn" id="settingsBtn" title="Settings">
+                <span>⚙️</span>
+            </button>
+            <button class="quick-btn" id="helpBtn" title="Help">
+                <span>❓</span>
+            </button>
+        </div>
+        
+        <!-- Help Panel (hidden by default) -->
+        <div class="help-panel" id="helpPanel" style="display: none;">
+            <div class="help-header">
+                <h3>How to Use Jarvis</h3>
+                <button class="close-btn" id="closeHelpBtn">✕</button>
+            </div>
+            <div class="help-content">
+                <div class="help-section">
+                    <h4>🎤 Voice Commands</h4>
+                    <p>Click "Start Listening" and speak naturally. Jarvis understands commands like:</p>
+                    <ul>
+                        <li>"Search for [topic]"</li>
+                        <li>"Scroll up/down"</li>
+                        <li>"Click on [element]"</li>
+                        <li>"Summarize this page"</li>
+                    </ul>
+                </div>
+                <div class="help-section">
+                    <h4>💬 Text Chat</h4>
+                    <p>Type commands or ask questions in the chat box. Jarvis powered by Gemini AI can help with complex tasks.</p>
+                </div>
+                <div class="help-section">
+                    <h4>⚙️ Settings</h4>
+                    <p>Configure your Gemini API key and customize Jarvis behavior in the extension settings.</p>
+                </div>
             </div>
         </div>
     </div>
