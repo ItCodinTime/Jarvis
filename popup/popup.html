@@ -34,24 +34,14 @@
             <div class="transcript-text" id="transcriptText">No commands yet...</div>
         </div>
         
-        <div class="commands-help">
-            <details>
-                <summary>Available Commands</summary>
-                <ul>
-                    <li><strong>"scroll down"</strong> - Scroll page down</li>
-                    <li><strong>"scroll up"</strong> - Scroll page up</li>
-                    <li><strong>"go back"</strong> - Navigate to previous page</li>
-                    <li><strong>"go forward"</strong> - Navigate to next page</li>
-                    <li><strong>"refresh"</strong> or <strong>"reload"</strong> - Reload page</li>
-                    <li><strong>"new tab"</strong> - Open new tab</li>
-                    <li><strong>"close tab"</strong> - Close current tab</li>
-                    <li><strong>"search for [query]"</strong> - Search on Google</li>
-                </ul>
-            </details>
-        </div>
-        
-        <div class="footer">
-            <p>Powered by Web Speech API</p>
+        <!-- New Text Chat Interface -->
+        <div class="chat-section">
+            <div class="chat-header">💬 Chat with Jarvis</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-container">
+                <textarea id="chatInput" placeholder="Type your command or question..." rows="2"></textarea>
+                <button id="chatSendBtn" class="btn btn-send">Send</button>
+            </div>
         </div>
     </div>
     
