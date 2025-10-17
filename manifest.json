@@ -1,14 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Jarvis - Voice-Controlled Browser Automation",
-  "version": "1.0.0",
-  "description": "An open-source Chrome extension inspired by ChromePilot for voice-controlled, AI-powered browser automation using Web Speech API",
+  "name": "Comet for Chrome - AI Browser Assistant",
+  "version": "2.0.0",
+  "description": "Advanced AI-powered browser automation with Gemini Nano, voice control, file uploads, and autonomous browsing capabilities",
   "permissions": [
     "activeTab",
     "scripting",
     "storage",
     "tabs",
-    "identity"
+    "identity",
+    "webNavigation",
+    "downloads",
+    "clipboardWrite",
+    "clipboardRead",
+    "notifications",
+    "contextMenus",
+    "webRequest",
+    "cookies",
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "<all_urls>",
@@ -25,12 +34,14 @@
     }
   },
   "background": {
-    "service_worker": "background/background.js"
+    "service_worker": "background/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["content/content.js"],
+      "css": ["content/content.css"],
       "run_at": "document_idle"
     }
   ],
@@ -39,5 +50,27 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/*", "icons/*", "assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Space",
+        "mac": "Command+Shift+Space"
+      },
+      "description": "Activate Comet Assistant"
+    },
+    "toggle-voice": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+V",
+        "mac": "Command+Shift+V"
+      },
+      "description": "Toggle voice input"
+    }
   }
 }
